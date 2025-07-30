@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Daftar Harga Online</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1 { color: #333; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
+    th { background-color: #f5f5f5; }
+  </style>
+</head>
+<body>
+  <h1>Daftar Harga Barang</h1>
+  <div id="tabel-harga">Loading data...</div>
+
+  <script>
+    async function loadExcel() {
+      const response = await fetch('harga.xlsx');
+      const arrayBuffer = await response.arrayBuffer();
+      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+      let html = '<table><thead><tr>';
+      data[0].forEach(header => html += `<th>${header}</th>`);
+      html += '</tr></thead><tbody>';
+
+      for (let i = 1; i < data.length; i++) {
+        html += '<tr>';
+        data[i].forEach(cell => html += `<td>${cell}</td>`);
+        html += '</tr>';
+      }
+
+      html += '</tbody></table>';
+      document.getElementById('tabel-harga').innerHTML = html;
+    }
+
+    loadExcel();
+  </script>
+</body>
+</html>
