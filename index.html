@@ -2,35 +2,34 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Daftar Harga Online</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <title>Daftar Harga - Google Sheet</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    h1 { color: #333; }
-    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-    th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
-    th { background-color: #f5f5f5; }
+    body { font-family: Arial; margin: 20px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background: #f5f5f5; }
   </style>
 </head>
 <body>
-  <h1>Daftar Harga Barang</h1>
-  <div id="tabel-harga">Loading data...</div>
+  <h1>Daftar Harga (Realtime dari Google Sheets)</h1>
+  <div id="tabel-harga">Loading...</div>
 
   <script>
-    async function loadExcel() {
-      const response = await fetch('harga.xlsx');
-      const arrayBuffer = await response.arrayBuffer();
-      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-      const sheet = workbook.Sheets[workbook.SheetNames[0]];
-      const data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+    const csvUrl = 'https://docs.google.com/spreadsheets/d/<1t1AZz-NAt0bvyJdaCeAp9FwgIj_5J0meMA2KJ2WQy-o>/gviz/tq?tqx=out:csv';
+
+    async function loadCSV() {
+      const response = await fetch(csvUrl);
+      const data = await response.text();
+      const rows = data.split('\n').map(r => r.split(','));
 
       let html = '<table><thead><tr>';
-      data[0].forEach(header => html += `<th>${header}</th>`);
+      rows[0].forEach(header => html += `<th>${header}</th>`);
       html += '</tr></thead><tbody>';
 
-      for (let i = 1; i < data.length; i++) {
+      for (let i = 1; i < rows.length; i++) {
+        if (rows[i].length < 2) continue; // skip empty row
         html += '<tr>';
-        data[i].forEach(cell => html += `<td>${cell}</td>`);
+        rows[i].forEach(cell => html += `<td>${cell}</td>`);
         html += '</tr>';
       }
 
@@ -38,7 +37,7 @@
       document.getElementById('tabel-harga').innerHTML = html;
     }
 
-    loadExcel();
+    loadCSV();
   </script>
 </body>
 </html>
