@@ -1,21 +1,81 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>Daftar Harga - Google Sheet</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daftar Harga</title>
   <style>
-    body { font-family: Arial; margin: 20px; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    th { background: #f5f5f5; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f9f9f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      max-width: 900px;
+      background-color: white;
+      box-shadow: 0 0 15px rgba(0,0,0,0.05);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 14px 20px;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+      font-size: 16px;
+    }
+
+    th {
+      background-color: #f2f2f2;
+      font-weight: bold;
+    }
+
+    tr:hover {
+      background-color: #fafafa;
+    }
+
+    @media (max-width: 600px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+
+      tr {
+        margin-bottom: 20px;
+      }
+
+      td {
+        text-align: right;
+        padding-left: 50%;
+        position: relative;
+      }
+
+      td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 20px;
+        top: 14px;
+        font-weight: bold;
+        text-align: left;
+      }
+
+      th {
+        display: none;
+      }
+    }
   </style>
 </head>
 <body>
-  <h1>Daftar Harga (Realtime dari Google Sheets)</h1>
   <div id="tabel-harga">Loading...</div>
 
   <script>
-    const csvUrl = 'https://docs.google.com/spreadsheets/d/<1t1AZz-NAt0bvyJdaCeAp9FwgIj_5J0meMA2KJ2WQy-o>/gviz/tq?tqx=out:csv';
+    const csvUrl = 'https://docs.google.com/spreadsheets/d/1t1AZz-NAt0bvyJdaCeAp9FwgIj_5J0meMA2KJ2WQy-o/gviz/tq?tqx=out:csv';
 
     async function loadCSV() {
       const response = await fetch(csvUrl);
@@ -27,9 +87,11 @@
       html += '</tr></thead><tbody>';
 
       for (let i = 1; i < rows.length; i++) {
-        if (rows[i].length < 2) continue; // skip empty row
+        if (rows[i].length < 2) continue;
         html += '<tr>';
-        rows[i].forEach(cell => html += `<td>${cell}</td>`);
+        rows[i].forEach((cell, j) => {
+          html += `<td data-label="${rows[0][j]}">${cell}</td>`;
+        });
         html += '</tr>';
       }
 
