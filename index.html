@@ -1,113 +1,99 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
   <title>Daftar Harga</title>
   <style>
     body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #f9f9f9;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 40px;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f9f9f9;
     }
-
+    h1 {
+      text-align: center;
+      color: #333;
+    }
     table {
-      border-collapse: collapse;
       width: 100%;
-      max-width: 900px;
-      background-color: white;
-      box-shadow: 0 0 15px rgba(0,0,0,0.05);
-      border-radius: 10px;
-      overflow: hidden;
+      border-collapse: collapse;
+      margin-top: 30px;
+      background: white;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-
     th, td {
-      padding: 14px 20px;
-      border-bottom: 1px solid #eee;
-      text-align: left;
-      font-size: 16px;
+      border: 1px solid #ddd;
+      padding: 12px;
+      text-align: center;
     }
-
     th {
       background-color: #f2f2f2;
-      font-weight: bold;
     }
-
-    tr:hover {
-      background-color: #fafafa;
+    img {
+      max-height: 80px;
+      border-radius: 8px;
     }
-
-    @media (max-width: 600px) {
+    @media(max-width: 600px) {
       table, thead, tbody, th, td, tr {
         display: block;
       }
-
-      tr {
-        margin-bottom: 20px;
-      }
-
       td {
-        text-align: right;
-        padding-left: 50%;
         position: relative;
+        padding-left: 50%;
       }
-
       td::before {
-        content: attr(data-label);
         position: absolute;
-        left: 20px;
-        top: 14px;
+        top: 12px;
+        left: 12px;
+        width: 45%;
+        white-space: nowrap;
         font-weight: bold;
-        text-align: left;
-      }
-
-      th {
-        display: none;
       }
     }
   </style>
 </head>
 <body>
-  <div id="tabel-harga">Loading...</div>
+  <h1>Daftar Harga Barang</h1>
+  <div id="tabel-harga">Memuat data...</div>
 
   <script>
     const csvUrl = 'https://docs.google.com/spreadsheets/d/1t1AZz-NAt0bvyJdaCeAp9FwgIj_5J0meMA2KJ2WQy-o/gviz/tq?tqx=out:csv';
 
- async function loadCSV() {
-    const response = await fetch(csvUrl);
-    const data = await response.text();
-    const rows = data.split('\n').map(r => r.split(','));
+    async function loadCSV() {
+      try {
+        const response = await fetch(csvUrl);
+        const data = await response.text();
+        const rows = data.trim().split('\n').map(row => {
+          // parsing CSV: split by comma, remove wrapping quotes
+          return row.split(',').map(cell => cell.replace(/^"|"$/g, ''));
+        });
 
-    if (rows.length < 2) return;
+        let html = '<table><thead><tr>';
+        rows[0].forEach(header => html += `<th>${header}</th>`);
+        html += '</tr></thead><tbody>';
 
-    let html = '<table><thead><tr>';
-    rows[0].forEach(header => html += `<th>${header}</th>`);
-    html += '</tr></thead><tbody>';
-
-    for (let i = 1; i < rows.length; i++) {
-      if (rows[i].length < 2) continue;
-      html += '<tr>';
-      rows[i].forEach((cell, j) => {
-        const header = rows[0][j].toLowerCase();
-        // tampilkan <img> jika kolom gambar dan link mulai dari http
-        if (header.includes('gambar') && cell.startsWith('http')) {
-          html += `<td data-label="${rows[0][j]}"><img src="${cell}" alt="gambar" style="height:100px;border-radius:10px;"></td>`;
-        } else {
-          html += `<td data-label="${rows[0][j]}">${cell}</td>`;
+        for (let i = 1; i < rows.length; i++) {
+          if (rows[i].length < 1) continue;
+          html += '<tr>';
+          rows[i].forEach((cell, j) => {
+            const header = rows[0][j].toLowerCase();
+            if (header.includes('gambar') && cell.startsWith('http')) {
+              html += `<td><img src="${cell}" alt="gambar"></td>`;
+            } else {
+              html += `<td>${cell}</td>`;
+            }
+          });
+          html += '</tr>';
         }
-      });
-      html += '</tr>';
+
+        html += '</tbody></table>';
+        document.getElementById('tabel-harga').innerHTML = html;
+      } catch (err) {
+        document.getElementById('tabel-harga').innerHTML = 'Gagal memuat data.';
+        console.error('Error:', err);
+      }
     }
 
-    html += '</tbody></table>';
-    document.getElementById('tabel-harga').innerHTML = html;
-  }
-
-  loadCSV();
-</script>
+    loadCSV();
+  </script>
 </body>
 </html>
