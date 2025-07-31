@@ -77,29 +77,36 @@
   <script>
     const csvUrl = 'https://docs.google.com/spreadsheets/d/1t1AZz-NAt0bvyJdaCeAp9FwgIj_5J0meMA2KJ2WQy-o/gviz/tq?tqx=out:csv';
 
-    async function loadCSV() {
-      const response = await fetch(csvUrl);
-      const data = await response.text();
-      const rows = data.split('\n').map(r => r.split(','));
+  async function loadCSV() {
+    const response = await fetch(csvUrl);
+    const data = await response.text();
+    const rows = data.split('\n').map(r => r.split(','));
 
-      let html = '<table><thead><tr>';
-      rows[0].forEach(header => html += `<th>${header}</th>`);
-      html += '</tr></thead><tbody>';
+    if (rows.length < 2) return;
 
-      for (let i = 1; i < rows.length; i++) {
-        if (rows[i].length < 2) continue;
-        html += '<tr>';
-        rows[i].forEach((cell, j) => {
+    let html = '<table><thead><tr>';
+    rows[0].forEach(header => html += `<th>${header}</th>`);
+    html += '</tr></thead><tbody>';
+
+    for (let i = 1; i < rows.length; i++) {
+      if (rows[i].length < 2) continue;
+      html += '<tr>';
+      rows[i].forEach((cell, j) => {
+        const header = rows[0][j].toLowerCase();
+        if (header.includes('gambar') && cell.startsWith('http')) {
+          html += `<td data-label="${rows[0][j]}"><img src="${cell}" alt="gambar" style="height:80px;border-radius:8px;" /></td>`;
+        } else {
           html += `<td data-label="${rows[0][j]}">${cell}</td>`;
-        });
-        html += '</tr>';
-      }
-
-      html += '</tbody></table>';
-      document.getElementById('tabel-harga').innerHTML = html;
+        }
+      });
+      html += '</tr>';
     }
 
-    loadCSV();
-  </script>
+    html += '</tbody></table>';
+    document.getElementById('tabel-harga').innerHTML = html;
+  }
+
+  loadCSV();
+</script>
 </body>
 </html>
