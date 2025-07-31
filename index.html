@@ -94,8 +94,9 @@
       rows[i].forEach((cell, j) => {
         const header = rows[0][j].toLowerCase();
         if (header.includes('gambar') && cell.startsWith('http')) {
-          html += `<td data-label="${rows[0][j]}"><img src="${cell}" alt="gambar" style="height:80px;border-radius:8px;" /></td>`;
-        } else {
+  html += `<td data-label="${rows[0][j]}"><img src="${cell}" alt="gambar" style="height:80px;border-radius:8px;" /></td>`;
+}
+ else {
           html += `<td data-label="${rows[0][j]}">${cell}</td>`;
         }
       });
